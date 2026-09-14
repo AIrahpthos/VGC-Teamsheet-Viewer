@@ -139,3 +139,27 @@ body {
 body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef2f6;color:#17243a}button,input{font:inherit}button,a,input{touch-action:manipulation}button{cursor:pointer}.shell{max-width:1260px;margin:auto;padding:30px}.mast{display:flex;align-items:center;gap:12px;margin-bottom:30px}.mark{background:#215de5;color:white;border-radius:12px;padding:10px}.mast h1{font-size:24px;font-weight:750;letter-spacing:-.7px}.mast small{margin-left:auto;color:#54647b;font-size:14px}.controls{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;padding:24px;background:#fff;border:1px solid #dce3ed;border-radius:16px}.field label{display:block;font-size:14px;font-weight:700;margin-bottom:10px}.field [data-slot=input-group],.search-input{width:100%;min-height:52px;background:#f6f8fb;border:1px solid #c9d3e2;border-radius:10px;font-size:16px}.search-input{padding:12px 16px}.section-head{margin:32px 0 20px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}.section-head h2{font-size:28px;font-weight:750;letter-spacing:-.7px}.section-head a{margin-left:auto;font-size:14px;color:#215de5}.team{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.pokemon{border:1px solid #dbe2ec;border-radius:14px;background:white;overflow:hidden}.pokemon-head{padding:20px;border-bottom:1px solid #e6ebf2;display:flex;gap:12px;align-items:center}.pokemon h3{font-size:22px;font-weight:750;letter-spacing:-.4px}.number{font-size:14px;color:#6c7c93;font-weight:700}.tera{display:inline-block;padding:4px 9px;background:#eaf0ff;color:#234f9e;border-radius:6px;font-size:14px;margin-top:7px}.details{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:18px 20px}.details dt{font-size:13px;color:#607087;margin-bottom:4px}.details dd{font-size:16px;font-weight:650}.moves{margin:0;padding:0 20px 18px;list-style:none}.moves li{padding:9px 0;border-top:1px solid #edf0f5;font-size:17px}.empty-state{margin:24px 0;padding:48px 20px;border:1px dashed #bcc9db;border-radius:16px;text-align:center}.empty-state h2{font-size:23px;font-weight:700}.empty-state p{color:#53637a;margin:10px auto;max-width:480px}.notice{background:#fff6df;border:1px solid #e8cc82;border-radius:10px;padding:16px;margin-top:16px;font-size:16px}.players{display:grid;gap:8px;margin-top:18px}.player{background:white;border:1px solid #d5dfea;border-radius:10px;padding:16px;text-align:left;display:flex;justify-content:space-between;gap:12px;min-height:56px}.player:hover{border-color:#215de5}.player small{color:#617188}.muted{font-size:14px;color:#617188}.footer{margin-top:26px;color:#64748b;font-size:13px}.retry{color:#215de5;text-decoration:underline;margin-left:10px}.manual{margin-top:15px;font-size:14px;color:#53637a}.manual form{display:flex;gap:8px;margin-top:10px}.manual input{flex:1;min-width:0;padding:12px;border:1px solid #c9d3e2;border-radius:8px;background:white}.manual button{background:#215de5;color:white;padding:12px 18px;border-radius:8px}.skeleton-grid{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:1000px){.team{grid-template-columns:repeat(2,minmax(0,1fr))}.shell{padding:24px}}@media(max-width:620px){.shell{padding:16px}.controls{grid-template-columns:1fr;gap:18px;padding:18px}.team{grid-template-columns:1fr}.mast small{display:none}.section-head h2{font-size:24px}.manual form{flex-wrap:wrap}.skeleton-grid{grid-template-columns:1fr}}
 
 .sprite{object-fit:contain;image-rendering:pixelated;flex-shrink:0}.pokemon-head>div{min-width:0}.pokemon h3{overflow-wrap:anywhere}
+
+
+/* Tablet/iPad: keep all six Pokémon compact enough to show as two rows. */
+@media (min-width:700px) and (max-width:1100px){
+  .shell{padding:20px}
+  .team{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .pokemon-head{padding:10px;gap:8px}
+  .pokemon-head img{width:40px;height:40px}
+  .pokemon h3{font-size:17px}
+  .tera{font-size:11px;padding:3px 6px;margin-top:4px}
+  .details{gap:6px;padding:9px 10px}
+  .details dt{font-size:10px;margin-bottom:2px}
+  .details dd{font-size:12px;overflow-wrap:anywhere}
+  .moves{padding:0 10px 8px}
+  .moves li{padding:5px 0;font-size:13px}
+}
+
+@media (max-width:699px){
+  .team{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+}
+
+@media (max-width:480px){
+  .team{grid-template-columns:1fr}
+}
