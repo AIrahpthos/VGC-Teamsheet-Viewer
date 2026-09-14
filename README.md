@@ -9,7 +9,7 @@ This standalone version runs on your Cloudflare account. It does not require Cha
 1. Sign in at https://dash.cloudflare.com/ (create a Cloudflare account first if needed).
 2. Open **Workers & Pages**, then **Create application**.
 3. Choose **Import a repository** / **Connect to Git**, select GitHub, and authorize access to this repository.
-4. Select **rk9-team-viewer**. Create a **Worker** application.
+4. Select **VGC-Teamsheet-Viewer**. Create a **Worker** application.
 5. Use these settings:
 
 | Setting | Value |
@@ -47,10 +47,10 @@ Build and manually deploy (alternative to Git integration):
 ```sh
 pnpm build
 pnpm exec wrangler login
-pnpm deploy
+pnpm run deploy
 ```
 
-`pnpm deploy` uses the generated `dist/server/wrangler.json`, which points at the compiled Worker and client assets. Do not deploy the unbuilt source entrypoint.
+`pnpm run deploy` uses the generated `dist/server/wrangler.json`, which points at the compiled Worker and client assets. Do not deploy the unbuilt source entrypoint.
 
 ## RK9 integration
 
