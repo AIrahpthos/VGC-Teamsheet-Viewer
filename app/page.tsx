@@ -106,6 +106,30 @@ function heldItemLabel(item: string): string {
  const ability = megaStoneAbilities[item.toLowerCase().replace(/[^a-z0-9]/g, "")];
  return item ? ability ? `${item} (${ability})` : item : "—";
 }
+
+function pokemonSpriteUrl(name: string): string {
+ const regional: Record<string, string> = {
+  alolan: "alola", galarian: "galar", hisuian: "hisui", paldean: "paldea"
+ };
+ let species = name.trim().toLowerCase()
+  .replace(/♀/g, "-f").replace(/♂/g, "-m")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+ species = species.replace(/^(alolan|galarian|hisuian|paldean)\s+(.+)$/, (_, region: string, base: string) => base + "-" + regional[region]);
+ species = species.replace(/\s*\((alolan|galarian|hisuian|paldean)(?: form)?\)$/, (_, region: string) => "-" + regional[region]);
+ const id = species.replace(/[^a-z0-9-]/g, "").replace(/^nidoran-([fm])$/, "nidoran$1").replace(/-mega-([xyz])$/, "-mega$1");
+ return id ? "https://play.pokemonshowdown.com/sprites/gen5/" + id + ".png" : "";
+}
+
+function PokemonIcon({ name, fallback, slot }: { name: string; fallback?: string; slot: number }) {
+ const sources = Array.from(new Set([pokemonSpriteUrl(name), fallback].filter((url): url is string => Boolean(url))));
+ const [attempt, setAttempt] = useState(0);
+ const source = sources[attempt];
+ // A bounded source list prevents retries looping if both providers lack an image.
+ return source
+  ? <img key={source} src={source} alt="" width={32} height={32} className="sprite" referrerPolicy="no-referrer" onError={() => setAttempt(current => current + 1)} />
+  : <span className="sprite number" aria-hidden="true">{String(slot).padStart(2, "0")}</span>;
+}
+
 export default function Home(){
  const [tournaments,setTournaments]=useState<Tournament[]>([]),[tournament,setTournament]=useState<Tournament|null>(null),[players,setPlayers]=useState<Player[]>([]),[query,setQuery]=useState(''),[selected,setSelected]=useState<Player|null>(null),[team,setTeam]=useState<Pokemon[]>([]),[loading,setLoading]=useState('tournaments'),[error,setError]=useState(''),[manual,setManual]=useState('');const sequence=useRef(0);
  async function loadTournaments(){setLoading('tournaments');setError('');try{const d=await api({action:'tournaments'});setTournaments(d.tournaments)}catch(e){setError((e as Error).message)}finally{setLoading('')}}
@@ -119,5 +143,5 @@ export default function Home(){
  {loading&&<div aria-live="polite"><p className="muted" style={{marginTop:24}}>Loading {loading==='team'?'teamsheet':loading==='roster'?'players':'tournaments'}…</p><div className="skeleton-grid">{[0,1,2].map(i=><Skeleton key={i} className="h-44 rounded-xl bg-slate-200"/>)}</div></div>}
  {!loading&&!tournament&&<Empty className="empty-state"><EmptyHeader><Search size={28} className="mx-auto mb-3 text-blue-600"/><EmptyTitle>Find your opponent’s team</EmptyTitle><EmptyDescription>Choose a tournament, then search for a player to open their public teamsheet.</EmptyDescription></EmptyHeader></Empty>}
  {!loading&&tournament&&!selected&&<section><div className="section-head"><h2>{query?'Players':'Find a player'}</h2><span className="muted">{players.length.toLocaleString()} registered</span></div>{!query?<p className="muted">Enter a name above to search this tournament’s roster.</p>:matches.length?<div className="players">{matches.slice(0,50).map((p,i)=><button className="player" key={p.name+p.team+i} onClick={()=>choosePlayer(p)}><span><strong>{p.name}</strong><br/><small>{[p.division,p.country].filter(Boolean).join(' · ')}</small></span><small>{p.team?'View team →':'Not published'}</small></button>)}{matches.length>50&&<p className="muted">Keep typing to narrow down {matches.length} matches.</p>}</div>:<p className="muted">No players match “{query}”. Try a first or last name.</p>}</section>}
- {selected&&<section><div className="section-head"><h2>{selected.name}</h2><span className="muted">{selected.division}</span>{selected.team&&<a href={'https://rk9.gg'+selected.team} target="_blank" rel="noreferrer">Original on RK9 ↗</a>}</div>{!selected.team?<div className="empty-state"><h2>Teamsheet not published</h2><p>RK9 does not currently provide a public teamsheet for this player.</p></div>:<div className="team">{team.map((p,i)=><article className="pokemon" key={i}><header className="pokemon-head">{p.sprite?<img src={p.sprite} alt="" width={32} height={32} className="sprite" onError={e=>{e.currentTarget.style.display="none"}}/>:<span className="number">0{i+1}</span>}<div><h3>{p.name}</h3>{p.tera&&<span className="tera">Tera · {p.tera}</span>}</div></header><dl className="details"><div><dt>Ability</dt><dd>{p.ability||'—'}</dd></div><div><dt>Held item</dt><dd>{heldItemLabel(p.item)}</dd></div></dl><ul className="moves">{p.moves.map((m,j)=><li key={j}>{m}</li>)}</ul>{p.extra&&<p className="muted px-5 pb-4">{p.extra}</p>}</article>)}</div>}</section>}<footer className="footer">Public teamsheets from RK9. Unofficial viewer; not affiliated with RK9 or Pokémon.</footer></main>
+ {selected&&<section><div className="section-head"><h2>{selected.name}</h2><span className="muted">{selected.division}</span>{selected.team&&<a href={'https://rk9.gg'+selected.team} target="_blank" rel="noreferrer">Original on RK9 ↗</a>}</div>{!selected.team?<div className="empty-state"><h2>Teamsheet not published</h2><p>RK9 does not currently provide a public teamsheet for this player.</p></div>:<div className="team">{team.map((p,i)=><article className="pokemon" key={i}><header className="pokemon-head"><PokemonIcon key={p.name + (p.sprite || "")} name={p.name} fallback={p.sprite} slot={i+1}/><div><h3>{p.name}</h3>{p.tera&&<span className="tera">Tera · {p.tera}</span>}</div></header><dl className="details"><div><dt>Ability</dt><dd>{p.ability||'—'}</dd></div><div><dt>Held item</dt><dd>{heldItemLabel(p.item)}</dd></div></dl><ul className="moves">{p.moves.map((m,j)=><li key={j}>{m}</li>)}</ul>{p.extra&&<p className="muted px-5 pb-4">{p.extra}</p>}</article>)}</div>}</section>}<footer className="footer">Public teamsheets from RK9. Unofficial viewer; not affiliated with RK9 or Pokémon.</footer></main>
 }
