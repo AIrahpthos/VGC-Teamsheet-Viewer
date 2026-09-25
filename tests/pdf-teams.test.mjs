@@ -42,3 +42,29 @@ test('PDF text import preserves errors and releases the reader',async()=>{
  await assert.rejects(readPdfText({streamTextContent:()=>stream}),/Unreadable page/);
  assert.equal(stream.locked,false);
 });
+
+function championsSheet(blank=false) {
+ return sheet(blank).map(t=> {
+  if(t.y===730)return {...t,str:t.str==='Tera Type'?'Ability':t.str==='Electric'?'Static':t.str};
+  if(t.y===720)return {...t,str:t.str==='Ability'?'Held Item':t.str==='Static'?'Light Ball':t.str};
+  if(t.y===710)return {...t,str:t.str==='Held Item'?'Stat Alignment':t.str==='Light Ball'?'Adamant':t.str};
+  return t;
+ });
+}
+test('Champions PDF maps Stat Alignment separately from Tera Type',()=>{
+ const p=parsePdfPage(championsSheet(),26).player;
+ assert.equal(p.pokemon.length,6);
+ assert.equal(p.pokemon[0].tera,'');
+ assert.equal(p.pokemon[0].ability,'Static');
+ assert.equal(p.pokemon[0].item,'Light Ball');
+ assert.equal(p.pokemon[0].extra,'Stat alignment · Adamant');
+ assert.deepEqual(p.pokemon[0].moves,['Thunderbolt','Protect','Surf','Volt Switch']);
+});
+test('blank Champions tables remain searchable',()=>{
+ const p=parsePdfPage(championsSheet(true),1).player;
+ assert.equal(p.team,null);assert.match(p.issue,/blank/);
+});
+test('missing required Champions row is rejected',()=>{
+ const p=parsePdfPage(championsSheet().filter(t=>t.str!=='Ability'),1).player;
+ assert.equal(p.team,null);assert.match(p.issue,/Unrecognised English/);
+});

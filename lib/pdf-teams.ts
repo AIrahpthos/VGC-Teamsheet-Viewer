@@ -1,5 +1,5 @@
 /** Coordinate-based reader for multilingual RK9 tournament PDFs (one player per page). */
-export type PdfPokemon = { name: string; item: string; ability: string; tera: string; moves: string[] };
+export type PdfPokemon = { name: string; item: string; ability: string; tera: string; moves: string[]; extra?: string };
 export type PdfPlayer = {
  name: string; country: string; division: string; team: string | null;
  pdfPage: number; trainer: string; pokemon: PdfPokemon[]; issue?: string;
@@ -33,7 +33,11 @@ export function parsePdfPage(items: PositionedText[], page: number): { name: str
  const left = centers[0]-(centers[1]-centers[0])/2;
  const nextLanguage = text.find(t=>t.y<english.y-2 && t.x<left && /^(FR|IT|DE|ES|JP|JA|KO|SC|TC|EN)$/.test(t.str.trim()));
  const table = text.filter(t=>t.y<english.y-2 && (!nextLanguage || t.y>nextLanguage.y+2));
- const labels = ['pokemon','tera type','ability','held item','move 1','move 2','move 3','move 4'];
+ const hasRow = (label: string) => table.some(t=>t.x<left && key(t.str)===label);
+ const hasTera = hasRow('tera type');
+ const hasAlignment = hasRow('stat alignment');
+ if (!hasTera && !hasAlignment) return fail('Unrecognised English table. Expected Tera Type or Stat Alignment.');
+ const labels = ['pokemon', ...(hasTera?['tera type']:[]), 'ability', 'held item', ...(hasAlignment?['stat alignment']:[]), 'move 1','move 2','move 3','move 4'];
  const rows = labels.map(label=>table.find(t=>t.x<left && key(t.str)===label));
  if (rows.some(t=>!t)) return fail('Unrecognised English table. Check the original page.');
  const anchors = rows as PositionedText[];
@@ -60,10 +64,12 @@ export function parsePdfPage(items: PositionedText[], page: number): { name: str
  const values=cells.map(row=>row.map(cell=>tidy(cell.sort((a,b)=>b.y-a.y||a.x-b.x).map(t=>t.str).join(' '))));
  if (values.every(row=>row.every(v=>!v))) return fail('This player’s team table is blank in the PDF.');
  for (let col=0;col<6;col++) {
-  const [species,tera,ability,item,...moves]=values.map(row=>row[col]);
+  const field = (label: string) => values[labels.indexOf(label)]?.[col] || '';
+  const species=field('pokemon'), tera=field('tera type'), ability=field('ability'), item=field('held item'), alignment=field('stat alignment');
+  const moves=[1,2,3,4].map(n=>field(`move ${n}`));
   if (!species && values.every(row=>!row[col])) continue;
-  if (!species || !tera || !ability || moves.every(m=>!m)) return fail('This team is incomplete or could not be read reliably. Check the original page.');
-  player.pokemon.push({ name:species, tera, ability, item, moves });
+  if (!species || (hasTera && !tera) || (hasAlignment && !alignment) || !ability || moves.every(m=>!m)) return fail('This team is incomplete or could not be read reliably. Check the original page.');
+  player.pokemon.push({ name:species, tera, ability, item, moves, ...(alignment ? {extra:`Stat alignment · ${alignment}`} : {}) });
  }
  if (!player.pokemon.length) return fail('No Pokémon could be read on this page.');
  player.team=`pdf:${page}`;
