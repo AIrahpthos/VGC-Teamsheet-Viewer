@@ -1,3 +1,5 @@
+import type { TextItem, TextMarkedContent } from 'pdfjs-dist/types/src/display/api';
+import { readPdfText } from './read-pdf-text';
 import { parsePdfPage, type PdfRoster } from './pdf-teams';
 
 export async function importPdf(file: File, progress: (page: number, total: number) => void): Promise<PdfRoster> {
@@ -12,7 +14,7 @@ export async function importPdf(file: File, progress: (page: number, total: numb
   const result: PdfRoster = { version:1, filename:file.name, name:file.name.replace(/\.pdf$/i,''), players:[], skipped:[] };
   for (let i=1;i<=pdf.numPages;i++) {
    const page=await pdf.getPage(i);
-   const content=await page.getTextContent();
+   const content=await readPdfText<TextItem | TextMarkedContent>(page);
    const parsed=parsePdfPage(content.items.flatMap(t=>'str' in t ? [{str:t.str,x:t.transform[4],y:t.transform[5],width:t.width}] : []),i);
    if(parsed){if(!result.players.length && parsed.name)result.name=parsed.name;result.players.push(parsed.player)}else result.skipped.push(i);
    page.cleanup();
