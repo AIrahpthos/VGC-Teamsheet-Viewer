@@ -6,11 +6,12 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "vinext dev",
-    "build": "vinext build",
+    "dev": "node scripts/prepare-pdf.mjs && vinext dev",
+    "build": "node scripts/prepare-pdf.mjs && vinext build",
     "deploy": "wrangler deploy --config dist/server/wrangler.json",
     "preview": "wrangler dev --config dist/server/wrangler.json",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:pdf": "node --experimental-strip-types --test tests/pdf-teams.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -26,6 +27,7 @@
     "lucide-react": "^1.31.0",
     "next": "16.3.4",
     "next-themes": "^0.4.6",
+    "pdfjs-dist": "^6.3.289",
     "radix-ui": "^1.6.7",
     "react": "19.2.6",
     "react-day-picker": "^10.0.1",

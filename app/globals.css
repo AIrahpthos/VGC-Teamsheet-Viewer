@@ -179,3 +179,10 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef2f6;color:#1
 .details > div { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 6px; align-items: baseline; }
 .details dt { margin: 0; }
 .details dd { min-width: 0; overflow-wrap: anywhere; }
+
+.pdf-import { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0 20px; }
+.pdf-import button { border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 14px; background: white; color: #1e40af; cursor: pointer; }
+.pdf-import button:disabled { opacity: .5; cursor: wait; }
+.viewer-controls { border: 0; padding: 0; margin: 0; min-width: 0; }
+.viewer-controls:disabled { opacity: .6; pointer-events: none; }
+.pdf-summary { margin: 12px 0; overflow-wrap: anywhere; }
