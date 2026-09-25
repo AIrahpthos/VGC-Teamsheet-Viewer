@@ -26,3 +26,19 @@ test('splits merged bracketed forms across adjacent species columns',()=>{
  const p=parsePdfPage(items,5).player;assert.equal(p.pokemon[2].name,'Ogerpon [Hearthflame Mask]');assert.equal(p.pokemon[3].name,'Calyrex [Shadow Rider]');
 });
 test('unsupported and image-only pages cannot masquerade as teams',()=>{assert.equal(parsePdfPage([],1),null);assert.equal(parsePdfPage([text('Random PDF',20,790)],1),null);});
+
+// A reader-only stream models the missing Safari async-iterator API.
+test('PDF text import works without ReadableStream async iteration', async()=>{
+ const {readPdfText}=await import('../lib/read-pdf-text.ts');
+ const stream=new ReadableStream({start(controller){controller.enqueue({items:[{str:'First'}]});controller.enqueue({items:[{str:'Second'}]});controller.close();}});
+ Object.defineProperty(stream,Symbol.asyncIterator,{value:undefined});
+ const result=await readPdfText({streamTextContent:()=>stream});
+ assert.deepEqual(result.items,[{str:'First'},{str:'Second'}]);
+ assert.equal(stream.locked,false);
+});
+test('PDF text import preserves errors and releases the reader',async()=>{
+ const {readPdfText}=await import('../lib/read-pdf-text.ts');
+ const stream=new ReadableStream({start(controller){controller.error(new Error('Unreadable page'));}});
+ await assert.rejects(readPdfText({streamTextContent:()=>stream}),/Unreadable page/);
+ assert.equal(stream.locked,false);
+});
